@@ -3,12 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tic Tac Toe</title>
+    <title>TicTacToe</title>
     <style>
         body {
             font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f9f9f9;
+        }
+        #container {
             text-align: center;
-            margin-top: 50px;
         }
         #board {
             display: grid;
@@ -40,21 +47,35 @@
             font-size: 16px;
             cursor: pointer;
         }
+        select {
+            margin-top: 20px;
+            padding: 10px;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
 
-    <h1>Tic-Tac-Toe</h1>
-    <div id="board"></div>
-    <div id="status"></div>
-    <button onclick="resetGame()">Reset Game</button>
+    <div id="container">
+        <h1>Tic Tac Toe</h1>
+        <select id="difficulty">
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+        </select>
+        <div id="board"></div>
+        <div id="status"></div>
+        <button onclick="resetGame()">Reset Game</button>
+    </div>
 
     <script>
         const board = document.getElementById('board');
         const statusDisplay = document.getElementById('status');
+        const difficultySelect = document.getElementById('difficulty');
         let gameActive = true;
         let currentPlayer = 'X';
         let gameState = ['', '', '', '', '', '', '', '', ''];
+        let botDifficulty = 'easy';
 
         const winningConditions = [
             [0, 1, 2],
@@ -89,51 +110,27 @@
             clickedCell.textContent = currentPlayer;
 
             checkResult();
+
+            if (currentPlayer === 'X' && gameActive) {
+                currentPlayer = 'O';
+                botMove();
+            }
         }
 
-        function checkResult() {
-            let roundWon = false;
+        function botMove() {
+            if (!gameActive) return;
 
-            for (let i = 0; i < winningConditions.length; i++) {
-                const [a, b, c] = winningConditions[i];
-                if (gameState[a] === '' || gameState[b] === '' || gameState[c] === '') {
-                    continue;
-                }
-                if (gameState[a] === gameState[b] && gameState[a] === gameState[c]) {
-                    roundWon = true;
-                    break;
-                }
+            if (botDifficulty === 'easy') {
+                easyBotMove();
+            } else if (botDifficulty === 'medium') {
+                mediumBotMove();
+            } else if (botDifficulty === 'hard') {
+                hardBotMove();
             }
 
-            if (roundWon) {
-                statusDisplay.textContent = `Player ${currentPlayer} has won!`;
-                gameActive = false;
-                return;
-            }
-
-            if (!gameState.includes('')) {
-                statusDisplay.textContent = 'Game ended in a draw!';
-                gameActive = false;
-                return;
-            }
-
-            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-            statusDisplay.textContent = `It's ${currentPlayer}'s turn`;
+            checkResult();
         }
 
-        function resetGame() {
-            gameActive = true;
-            currentPlayer = 'X';
-            gameState = ['', '', '', '', '', '', '', '', ''];
-            statusDisplay.textContent = `It's ${currentPlayer}'s turn`;
-            document.querySelectorAll('.cell').forEach(cell => {
-                cell.textContent = '';
-            });
-        }
-
-        createBoard();
-        resetGame();
-    </script>
-
-</body>
-</html>
+        function easyBotMove() {
+            let availableCells = gameState.map((cell, index) => cell === '' ? index : null).filter(index => index !== null);
+            const randomIndex = availableCells
